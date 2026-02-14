@@ -127,13 +127,124 @@ Applications include:
 - Biomedical imaging (heart conductivity at 2 MHz)  
 - Enhanced multi-channel magnetometer arrays  
 - Advanced image reconstruction algorithms  
+## Project Summary — Resonant Scan Processing & Eddy Current Mapping
+
+This project processes frequency-scan measurements acquired on a 2D grid (e.g., over a conductive target)
+to reconstruct spatial maps of resonant response parameters and derive **eddy-current distributions**
+from a magnetic-field-related signal proxy.
+
+Pipeline overview:
+
+1. **Per-pixel spectral fitting** (Lorentzian + dispersive response)
+2. **Scan re-ordering** (serpentine scan correction) + smoothing
+3. **Optional feature metrology** from averaged cross-sections
+4. **Eddy-current mapping** (first-order proportional model; diffusion-based physics in references)
 
 ---
 
-## 📚 References  
+## 1) Per-pixel Lorentzian / dispersive fitting (spectral feature extraction)
 
-- Savukov, I. M., et al. (2005). *Tunable Atomic Magnetometer for Detection of Radio-Frequency Magnetic Fields*.  
+For each pixel of the scan grid `(x_dim × y_dim)`, the measured traces are:
+
+- `data_x(pixel, :)` : in-phase / absorptive-like channel  
+- `data_y(pixel, :)` : quadrature / dispersive-like channel  
+- `data_w(pixel, :)` : frequency axis
+
+Two models are fitted using nonlinear least squares (`lsqcurvefit`):
+
+**Lorentzian amplitude model (X-channel)**
+\[
+X(\omega) = A \frac{\gamma^2}{\gamma^2 + (\omega-\omega_0)^2} + C
+\]
+
+**Dispersive / derivative-Lorentzian model (Y-channel)**
+\[
+Y(\omega) = A \gamma \frac{\omega-\omega_0}{\gamma^2 + (\omega-\omega_0)^2} + C
+\]
+
+This absorptive/dispersive decomposition is standard for resonance lineshapes and quadrature detection.
+
+**References**
+- S. M. Kay, *Fundamentals of Statistical Signal Processing: Estimation Theory*, Prentice Hall, 1993 (least-squares / parameter estimation background).
+- A. Oppenheim, A. Willsky, S. Nawab, *Signals and Systems*, 2nd ed., Prentice Hall (quadrature signals / LTI systems background).
+- For resonance lineshapes and dispersive quadratures: see standard spectroscopy/lock-in detection treatments (e.g., Stanford Research Systems lock-in amplifier application notes; general lock-in detection references).
 
 ---
 
-👉 This project demonstrates the feasibility of **atomic magnetometry for high-resolution EMI**, bridging physics, signal processing, and imaging.  
+## 2) Scan re-ordering → image reconstruction (serpentine scan correction)
+
+The acquisition is performed in a **serpentine pattern** (alternating scan direction row by row).
+`process_image_single2()` restores the correct spatial arrangement:
+
+- even rows kept left→right  
+- odd rows flipped right→left  
+- global rotation to match the lab coordinate convention
+
+A light Gaussian smoothing is applied to reduce pixel noise while preserving spatial structure.
+
+**References**
+- R. C. Gonzalez, R. E. Woods, *Digital Image Processing*, 4th ed., Pearson (image filtering, smoothing, interpolation concepts).
+- MATLAB documentation: `imgaussfilt`, `fspecial('gaussian')`, `conv2`, `padarray` (implementation details).
+
+---
+
+## 3) Spatial feature metrology (optional)
+
+`interpo22()` computes a 1D cross-section by averaging a band of rows, then:
+- interpolates the profile (cubic interpolation),
+- smooths it,
+- extracts extrema on left/right segments,
+- estimates a characteristic spacing (e.g., diameter proxy) from midpoints of max/min pairs.
+
+**References**
+- Gonzalez & Woods, *Digital Image Processing* (profile extraction, smoothing, peak detection basics).
+- MATLAB Curve Fitting Toolbox documentation: `fit(...,'cubicinterp')`, smoothing utilities.
+
+---
+
+## 4) Eddy-current estimation and visualization
+
+Assuming the reconstructed map is proportional to a magnetic-field amplitude \(B(x,y)\),
+the code computes a **first-order eddy-current density magnitude proxy**:
+
+\[
+J(x,y) \approx \sigma \, B(x,y) \, \omega \, d
+\]
+
+where:
+- \(\sigma\) is electrical conductivity (e.g., copper \(\sigma \approx 5.8\times10^7\,\mathrm{S/m}\))
+- \(d\) is thickness (m)
+- \(\omega = 2\pi f\) is angular frequency (rad/s)
+
+Contours of `J(x,y)` are overlaid on the background map to visualize spatial current distribution.
+
+**Important note (physics):**  
+This proportional relation is intended for **qualitative mapping / visualization**.  
+For quantitative eddy-current reconstruction, the correct physics is governed by Maxwell’s equations,
+which reduce (in good conductors, harmonic regime) to a **diffusion equation** with skin depth:
+\[
+\delta = \sqrt{\frac{2}{\mu \sigma \omega}}
+\]
+and geometry/boundary conditions strongly affect the actual current distribution.
+
+
+
+<img width="832" height="1166" alt="image" src="https://github.com/user-attachments/assets/b6f4361a-dc8b-47d9-aa5a-0c1e6ae04a2e" />
+
+
+
+**References (eddy currents & EM diffusion)**
+- D. J. Griffiths, *Introduction to Electrodynamics*, 4th ed., Pearson (conductors, skin depth, EM in matter).
+- J. D. Jackson, *Classical Electrodynamics*, 3rd ed., Wiley (harmonic fields in conductors, diffusion/skin effect).
+- C. V. Dodd, W. E. Deeds, “Analytical Solutions to Eddy-Current Probe-Coil Problems,” *Journal of Applied Physics* 39, 2829 (1968) — classic analytic eddy-current coil/half-space solutions.
+- N. Bowler, “Eddy-current interaction with an ideal crack,” *Journal of Applied Physics* 75, 8128 (1994) — eddy currents and conductivity/defect interaction (useful for how geometry matters).
+- For practical inversion / eddy-current imaging: D. Jiles, *Introduction to Magnetism and Magnetic Materials* (background), and NDT literature on eddy-current testing.
+
+---
+
+## Typical Usage
+
+1) Fit per pixel:
+
+```matlab
+[xmidMatrix, ymidMatrix, rMatrix, phiMatrix] = lorentzian_fit(x_dim, y_dim, data_length_x, data_x, data_y, data_w, 0);
