@@ -115,18 +115,15 @@ EMI contrast depends on:
 Magnetic resonance signals are modeled using absorptive and dispersive components:
 
 **Absorptive (Lorentzian)**
-\[
-\tilde{S}_x (\omega_{RF}) =
+\[ \tilde{S}_x (\omega_{RF}) =
 \frac{S_0 B_{RF} \gamma \Gamma}
-{4[(\omega_{RF} - \Omega_L)^2 + \Gamma^2 / 4]}
-\]
+{4[(\omega_{RF} - \Omega_L)^2 + \Gamma^2 / 4]} \]
 
 **Dispersive**
-\[
-\tilde{S}_y (\omega_{RF}) =
+
+\[ \tilde{S}_y (\omega_{RF}) =
 \frac{S_0 B_{RF} \gamma (\Omega_L - \omega_{RF})}
-{2[(\omega_{RF} - \Omega_L)^2 + \Gamma^2 / 4]}
-\]
+{2[(\omega_{RF} - \Omega_L)^2 + \Gamma^2 / 4]} \]
 
 Where:
 
@@ -200,6 +197,8 @@ J(x,y) \approx \sigma B(x,y) \omega d
 ⚠️ Qualitative model — see references for full EM diffusion physics.
 
 ---
+
+<img width="2256" height="892" alt="image" src="https://github.com/user-attachments/assets/dade032f-6678-4405-a2e2-871f52439742" />
 
 ## 🖼️ Example Output
 
