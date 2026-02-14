@@ -5,6 +5,7 @@
 - **Prof. Ferruccio Renzoni** – University College London, Department of Physics and Astronomy  
 - **Dr. Han Yao** – University College London, Department of Physics and Astronomy  
 
+Summer internship 2024
 ---
 
 ## 📖 Introduction
