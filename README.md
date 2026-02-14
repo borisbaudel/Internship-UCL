@@ -61,6 +61,9 @@ The system is based on an **unshielded RF-AM architecture**, following:
 
 Savukov *et al.*, *Phys. Rev. Lett.* **95**, 063004 (2005)
 
+
+<img width="1580" height="1032" alt="image" src="https://github.com/user-attachments/assets/3475c156-6e25-4e33-b495-9bce6a88f643" />
+
 ### Key Elements
 
 - **Alkali vapor cell**: Rubidium (Rb)
@@ -200,6 +203,13 @@ J(x,y) \approx \sigma B(x,y) \omega d
 ---
 
 <img width="2256" height="892" alt="image" src="https://github.com/user-attachments/assets/dade032f-6678-4405-a2e2-871f52439742" />
+
+<img width="1744" height="978" alt="image" src="https://github.com/user-attachments/assets/456dc693-368e-4885-98c6-9ed762ddf672" />
+
+<img width="2340" height="740" alt="image" src="https://github.com/user-attachments/assets/d968ed7d-8a55-4dd1-86cc-8b97b3a187d6" />
+
+<img width="2190" height="574" alt="image" src="https://github.com/user-attachments/assets/b1754a4c-4c0e-4a75-862b-1e501b3cb4b8" />
+
 
 ## 🖼️ Example Output
 
